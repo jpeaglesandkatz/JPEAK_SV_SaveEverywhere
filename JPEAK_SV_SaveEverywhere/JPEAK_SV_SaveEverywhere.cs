@@ -3,6 +3,7 @@ using BepInEx.Configuration;
 using BepInEx.Logging;
 using HarmonyLib;
 using UnityEngine;
+using UnityEngine.Playables;
 
 namespace JPEAK_SV_SaveEverywhere
 {
@@ -31,10 +32,17 @@ namespace JPEAK_SV_SaveEverywhere
 
 
         [HarmonyPatch(typeof(GameManager), "CheckPlayerSafe")]
-        [HarmonyPostfix]
-        static bool PlayerSafe_post(bool ___result)
+        [HarmonyPrefix]
+        public static bool PlayerSafe_post(ref bool __result)
         {
-            return ___result = true;
+            if (!GameData.data.permadeath)
+            {
+                __result = true;
+                // skip original method
+                return false;
+            }
+            // If permadeath just run the original method, still no saving there
+            return true;
         }
 
     }
